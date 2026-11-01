@@ -1,0 +1,2 @@
+# KoraAjedrez
+Juego de ajedrez
