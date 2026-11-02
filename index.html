@@ -2,173 +2,271 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#2c1d11">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#23140a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Ajedrez Clásico</title>
-
-  <!-- PWA MANIFEST INTEGRADO -->
-  <link rel="manifest" href="data:application/manifest+json,{
-    %22name%22:%22Ajedrez%20Cl%C3%A1sico%22,
-    %22short_name%22:%22Ajedrez%22,
-    %22start_url%22:%22./index.html%22,
-    %22display%22:%22standalone%22,
-    %22orientation%22:%22portrait%22,
-    %22background_color%22:%22%231c120c%22,
-    %22theme_color%22:%22%232c1d11%22,
-    %22icons%22:[{
-      %22src%22:%22data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%235c3a21'/><text y='75' x='15' font-size='70'>♞</text></svg>%22,
-      %22sizes%22:%22192x192 512x512%22,
-      %22type%22:%22image/svg+xml%22
-    }]
-  }">
+  
+  <link rel="manifest" href="./manifest.json">
 
   <style>
-    * { box-sizing: border-box; user-select: none; -webkit-user-select: none; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
-      background: radial-gradient(circle, #2b1b11 0%, #110a06 100%);
-      color: #f5deb3;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(circle at center, #2e1c10 0%, #120904 100%);
+      color: #f7e7ce;
+      font-family: Arial, sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
       min-height: 100vh;
-      padding: 10px;
-      overflow-x: hidden;
+      min-height: 100dvh;
+      padding: env(safe-area-inset-top, 12px) 12px env(safe-area-inset-bottom, 12px) 12px;
     }
+
+    /* BARRA SUPERIOR */
     header {
       width: 100%;
-      max-width: 460px;
+      max-width: 440px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 6px 12px;
-      background: rgba(0,0,0,0.4);
+      padding: 8px 12px;
+      background: rgba(43, 27, 17, 0.95);
+      border: 1px solid #633f24;
       border-radius: 10px;
-      border: 1px solid #5a3d28;
+      margin-top: 4px;
+      margin-bottom: 6px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.5);
     }
-    .status-text { font-size: 1.1rem; font-weight: bold; color: #ffebcd; }
-    .btn {
-      background: linear-gradient(180deg, #8a5a36 0%, #52331c 100%);
+
+    .status-text {
+      font-size: 1.05rem;
+      font-weight: bold;
+      color: #ffebcd;
+    }
+
+    .btn-menu {
+      background: #4a2813;
       color: #fff;
-      border: 1px solid #c89666;
+      border: 1px solid #8d562c;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    #install-banner {
+      display: none;
+      width: 100%;
+      max-width: 440px;
+      background: #2e7d32;
+      color: #ffffff;
+      padding: 10px;
       border-radius: 8px;
-      padding: 8px 14px;
-      font-size: 0.95rem;
+      text-align: center;
+      margin-bottom: 6px;
       font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.5);
+      border: 1px solid #4caf50;
     }
-    .btn:active { transform: translateY(2px); box-shadow: 0 1px 2px rgba(0,0,0,0.5); }
-    
-    /* TABLERO ESTILO MADERA REALISTA */
-    #board-wrapper {
+
+    /* CONTENEDOR Y TABLERO ESTILO MADERA */
+    #board-frame {
       width: 100%;
       max-width: 440px;
       aspect-ratio: 1 / 1;
-      padding: 12px;
-      background: linear-gradient(135deg, #422517, #1f110a);
+      background: linear-gradient(135deg, #422515, #221209);
+      padding: 10px;
       border-radius: 12px;
+      border: 3px solid #6b4021;
       box-shadow: 0 10px 25px rgba(0,0,0,0.8), inset 0 0 10px rgba(0,0,0,0.7);
-      border: 3px solid #7c4c29;
     }
+
     #board {
       width: 100%;
       height: 100%;
       display: grid;
       grid-template-columns: repeat(8, 1fr);
       grid-template-rows: repeat(8, 1fr);
-      border: 2px solid #231209;
+      border: 2px solid #1a0e07;
+      border-radius: 4px;
+      overflow: hidden;
     }
+
     .square {
-      position: relative;
+      width: 100%;
+      height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: clamp(34px, 10vw, 48px);
+      font-size: clamp(32px, 9.5vw, 46px);
+      line-height: 1;
       cursor: pointer;
+      position: relative;
     }
+
     .light { background-color: #eed9b3; }
     .dark { background-color: #9c6c44; }
     .selected { background-color: #7fac72 !important; }
+
     .hint::after {
       content: "";
       width: 28%;
       height: 28%;
-      background: rgba(46, 139, 87, 0.7);
+      background: rgba(46, 125, 50, 0.75);
       border-radius: 50%;
       position: absolute;
     }
+
     .hint.capture::after {
-      width: 75%;
-      height: 75%;
+      width: 72%;
+      height: 72%;
       background: transparent;
-      border: 4px solid rgba(200, 30, 30, 0.7);
+      border: 4px solid rgba(211, 47, 47, 0.85);
       border-radius: 50%;
     }
 
-    /* CONTROLES Y NIVELES ACCESIBLES */
+    /* SELECTOR DE DIFICULTAD */
     .controls {
       width: 100%;
-      max-width: 460px;
+      max-width: 440px;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 6px;
       margin: 8px 0;
     }
+
     .lvl-btn {
-      padding: 8px 2px;
-      font-size: 0.85rem;
-      background: #331f13;
-      border: 1px solid #6b4324;
-      color: #d1b194;
-      border-radius: 6px;
+      padding: 10px 2px;
+      background: #2b180d;
+      color: #cfb39b;
+      border: 1px solid #57331c;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: bold;
       cursor: pointer;
     }
+
     .lvl-btn.active {
-      background: #94582f;
-      color: #fff;
-      font-weight: bold;
-      border-color: #ffc285;
+      background: #8b4513;
+      color: #ffffff;
+      border-color: #ff9800;
+      box-shadow: 0 0 6px rgba(255,152,0,0.5);
     }
+
+    /* BOTONES DE ACCIÓN */
     .actions {
       width: 100%;
-      max-width: 460px;
+      max-width: 440px;
+      display: flex;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px;
+      background: linear-gradient(180deg, #61361c, #3d2010);
+      color: #ffffff;
+      border: 1px solid #94572e;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+    }
+
+    .btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    }
+
+    /* MODAL DE PARTIDAS Y GUARDADO */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-content {
+      background: #2a170d;
+      border: 2px solid #8d562c;
+      border-radius: 12px;
+      max-width: 400px;
+      width: 100%;
+      padding: 18px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: #ffebcd;
+      margin-bottom: 14px;
+    }
+
+    .slot-card {
+      background: #1c0e07;
+      border: 1px solid #57331c;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
       display: flex;
       justify-content: space-between;
-      gap: 10px;
+      align-items: center;
     }
-    .actions .btn { flex: 1; padding: 12px; font-size: 1rem; }
-    #install-banner {
-      display: none;
-      width: 100%;
-      max-width: 460px;
-      background: #235429;
-      color: #fff;
-      padding: 10px;
-      border-radius: 8px;
-      text-align: center;
-      margin-bottom: 6px;
-      border: 1px solid #489e53;
-      cursor: pointer;
+
+    .slot-info { text-align: left; }
+    .slot-info h4 { font-size: 0.95rem; color: #ffca80; }
+    .slot-info p { font-size: 0.8rem; color: #b89b82; }
+
+    .btn-slot {
+      padding: 8px 12px;
+      font-size: 0.85rem;
       font-weight: bold;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      margin-left: 4px;
     }
+
+    .btn-load { background: #2e7d32; color: #fff; }
+    .btn-save { background: #b26a00; color: #fff; }
   </style>
 </head>
 <body>
 
-  <header>
-    <div id="status" class="status-text">Tu turno (Blancas)</div>
-    <div id="ai-status" style="font-size: 0.8rem; color: #ffbf80;">Listo</div>
-  </header>
-
   <div id="install-banner" onclick="instalarApp()">
-    📲 Instalar juego en el celular
+    📲 Toca aquí para instalar el juego en tu celular
   </div>
 
-  <div id="board-wrapper">
+  <header>
+    <div>
+      <div id="status" class="status-text">Tu turno (Blancas)</div>
+      <div id="slot-indicator" style="font-size: 0.75rem; color: #c49c74;">Partida 1</div>
+    </div>
+    <button class="btn-menu" onclick="abrirModal()">💾 Partidas</button>
+  </header>
+
+  <div id="board-frame">
     <div id="board"></div>
   </div>
 
@@ -184,32 +282,100 @@
     <button class="btn" onclick="reiniciarPartida()">🔄 Nueva Partida</button>
   </div>
 
+  <!-- MODAL DE GUARDADO / CARGA DE PARTIDAS -->
+  <div id="slots-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-title">Gestión de Partidas</div>
+      
+      <div class="slot-card">
+        <div class="slot-info">
+          <h4>Partida 1</h4>
+          <p id="info-slot-1">Vacía</p>
+        </div>
+        <div>
+          <button class="btn-slot btn-save" onclick="guardarRanura(1)">Guardar</button>
+          <button class="btn-slot btn-load" onclick="cargarRanura(1)">Cargar</button>
+        </div>
+      </div>
+
+      <div class="slot-card">
+        <div class="slot-info">
+          <h4>Partida 2</h4>
+          <p id="info-slot-2">Vacía</p>
+        </div>
+        <div>
+          <button class="btn-slot btn-save" onclick="guardarRanura(2)">Guardar</button>
+          <button class="btn-slot btn-load" onclick="cargarRanura(2)">Cargar</button>
+        </div>
+      </div>
+
+      <div class="slot-card">
+        <div class="slot-info">
+          <h4>Partida 3</h4>
+          <p id="info-slot-3">Vacía</p>
+        </div>
+        <div>
+          <button class="btn-slot btn-save" onclick="guardarRanura(3)">Guardar</button>
+          <button class="btn-slot btn-load" onclick="cargarRanura(3)">Cargar</button>
+        </div>
+      </div>
+
+      <button class="btn" style="margin-top: 10px; width: 100%;" onclick="cerrarModal()">Cerrar</button>
+    </div>
+  </div>
+
   <script>
-    // --- AUDIO SINTETIZADO CON WEB AUDIO API (100% OFFLINE) ---
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    let actx = null;
-    function playWoodSound(capture = false) {
-      if (!actx) actx = new AudioCtx();
-      const osc = actx.createOscillator();
-      const gain = actx.createGain();
-      osc.type = capture ? "sawtooth" : "triangle";
-      osc.frequency.setValueAtTime(capture ? 140 : 220, actx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(30, actx.currentTime + 0.08);
-      gain.gain.setValueAtTime(0.4, actx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.08);
-      osc.connect(gain);
-      gain.connect(actx.destination);
-      osc.start();
-      osc.stop(actx.currentTime + 0.08);
+    // Registro de Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
     }
 
-    // --- REPRESENTACIÓN SIMPLIFICADA DEL TABLERO ---
+    // Instalación PWA
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('install-banner').style.display = 'block';
+    });
+
+    function instalarApp() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          document.getElementById('install-banner').style.display = 'none';
+          deferredPrompt = null;
+        });
+      }
+    }
+
+    // Audio Sintético sin librerías externas
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let actx = null;
+    function playSound(isCapture) {
+      try {
+        if (!actx) actx = new AudioCtx();
+        if (actx.state === 'suspended') actx.resume();
+        const osc = actx.createOscillator();
+        const gain = actx.createGain();
+        osc.frequency.setValueAtTime(isCapture ? 120 : 210, actx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(30, actx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.35, actx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(actx.destination);
+        osc.start();
+        osc.stop(actx.currentTime + 0.08);
+      } catch (e) {}
+    }
+
     const SYMBOLS = {
       'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'p': '♟',
       'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔', 'P': '♙'
     };
 
-    let boardState = [
+    const INITIAL_BOARD = [
       ['r','n','b','q','k','b','n','r'],
       ['p','p','p','p','p','p','p','p'],
       ['','','','','','','',''],
@@ -220,15 +386,17 @@
       ['R','N','B','Q','K','B','N','R']
     ];
 
+    let boardState = JSON.parse(JSON.stringify(INITIAL_BOARD));
     let history = [];
     let selectedSquare = null;
     let validMoves = [];
     let difficulty = 1;
     let isGameOver = false;
+    let currentSlot = 1;
 
     const boardElem = document.getElementById("board");
     const statusElem = document.getElementById("status");
-    const aiStatusElem = document.getElementById("ai-status");
+    const slotIndicator = document.getElementById("slot-indicator");
 
     function renderBoard() {
       boardElem.innerHTML = '';
@@ -236,14 +404,12 @@
         for (let c = 0; c < 8; c++) {
           const sq = document.createElement("div");
           sq.className = `square ${(r + c) % 2 === 0 ? 'light' : 'dark'}`;
-          sq.dataset.row = r;
-          sq.dataset.col = c;
-
+          
           const piece = boardState[r][c];
           if (piece) {
             sq.textContent = SYMBOLS[piece];
-            sq.style.color = piece === piece.toUpperCase() ? '#fffbe6' : '#140c06';
-            sq.style.textShadow = piece === piece.toUpperCase() ? '0 2px 4px #000' : '0 1px 2px #fff8';
+            sq.style.color = piece === piece.toUpperCase() ? '#ffffff' : '#140c06';
+            sq.style.textShadow = piece === piece.toUpperCase() ? '0 1px 3px #000' : '0 1px 1px rgba(255,255,255,0.4)';
           }
 
           if (selectedSquare && selectedSquare.r === r && selectedSquare.c === c) {
@@ -262,8 +428,8 @@
       }
     }
 
-    function isWhite(piece) { return piece && piece === piece.toUpperCase(); }
-    function isBlack(piece) { return piece && piece === piece.toLowerCase(); }
+    function isWhite(p) { return p && p === p.toUpperCase(); }
+    function isBlack(p) { return p && p === p.toLowerCase(); }
 
     function getBasicMoves(r, c, state) {
       const p = state[r][c];
@@ -271,7 +437,6 @@
       const white = isWhite(p);
       const enemyCheck = white ? isBlack : isWhite;
 
-      // Peones simplificados
       if (p.toLowerCase() === 'p') {
         const dir = white ? -1 : 1;
         if (state[r + dir] && state[r + dir][c] === '') {
@@ -287,7 +452,6 @@
         });
       }
 
-      // Caballos
       if (p.toLowerCase() === 'n') {
         [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]].forEach(([dr, dc]) => {
           const nr = r + dr, nc = c + dc;
@@ -297,7 +461,6 @@
         });
       }
 
-      // Rayas (Torre, Alfil, Reina)
       const dirs = [];
       if (['r', 'q'].includes(p.toLowerCase())) dirs.push([-1,0],[1,0],[0,-1],[0,1]);
       if (['b', 'q'].includes(p.toLowerCase())) dirs.push([-1,-1],[-1,1],[1,-1],[1,1]);
@@ -317,7 +480,6 @@
         }
       });
 
-      // Rey
       if (p.toLowerCase() === 'k') {
         for (let dr = -1; dr <= 1; dr++) {
           for (let dc = -1; dc <= 1; dc++) {
@@ -365,11 +527,11 @@
       boardState[tr][tc] = boardState[fr][fc];
       boardState[fr][fc] = '';
 
-      // Promoción básica a dama
       if (boardState[tr][tc] === 'P' && tr === 0) boardState[tr][tc] = 'Q';
       if (boardState[tr][tc] === 'p' && tr === 7) boardState[tr][tc] = 'q';
 
-      playWoodSound(captured);
+      playSound(captured);
+      autoGuardarSlot();
     }
 
     function deshacer() {
@@ -380,26 +542,19 @@
         isGameOver = false;
         statusElem.textContent = "Tu turno (Blancas)";
         renderBoard();
+        autoGuardarSlot();
       }
     }
 
     function reiniciarPartida() {
-      boardState = [
-        ['r','n','b','q','k','b','n','r'],
-        ['p','p','p','p','p','p','p','p'],
-        ['','','','','','','',''],
-        ['','','','','','','',''],
-        ['','','','','','','',''],
-        ['','','','','','','',''],
-        ['P','P','P','P','P','P','P','P'],
-        ['R','N','B','Q','K','B','N','R']
-      ];
+      boardState = JSON.parse(JSON.stringify(INITIAL_BOARD));
       history = [];
       selectedSquare = null;
       validMoves = [];
       isGameOver = false;
       statusElem.textContent = "Tu turno (Blancas)";
       renderBoard();
+      autoGuardarSlot();
     }
 
     function setDiff(lvl) {
@@ -409,9 +564,7 @@
       });
     }
 
-    // --- IA DE DIFICULTADES ESCALONADAS ---
     function turnoIA() {
-      aiStatusElem.textContent = "Pensando...";
       statusElem.textContent = "Turno de las Negras...";
 
       setTimeout(() => {
@@ -433,52 +586,97 @@
 
         let chosenMove;
         if (difficulty === 1) {
-          // Fácil: Aleatorio
           chosenMove = allMoves[Math.floor(Math.random() * allMoves.length)];
         } else {
-          // Busca capturar piezas de mayor valor
           const pieceVals = { 'p': 10, 'n': 30, 'b': 30, 'r': 50, 'q': 90, 'k': 900 };
           allMoves.sort((a, b) => {
             const valA = boardState[a.tr][a.tc] ? (pieceVals[boardState[a.tr][a.tc].toLowerCase()] || 0) : 0;
             const valB = boardState[b.tr][b.tc] ? (pieceVals[boardState[b.tr][b.tc].toLowerCase()] || 0) : 0;
             return valB - valA;
           });
-          chosenMove = (difficulty > 2 && allMoves[0].val > 0) ? allMoves[0] : allMoves[Math.floor(Math.random() * Math.min(3, allMoves.length))];
+          chosenMove = (difficulty > 2 && pieceVals[boardState[allMoves[0].tr][allMoves[0].tc]?.toLowerCase()]) ? allMoves[0] : allMoves[Math.floor(Math.random() * Math.min(3, allMoves.length))];
         }
 
         ejecutarMovimiento(chosenMove.fr, chosenMove.fc, chosenMove.tr, chosenMove.tc);
-        aiStatusElem.textContent = "Listo";
         statusElem.textContent = "Tu turno (Blancas)";
         renderBoard();
       }, 300);
     }
 
-    // --- INSTALACIÓN PWA NATIVA ---
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      document.getElementById('install-banner').style.display = 'block';
-    });
+    // --- GESTIÓN DE GUARDADO LOCAL MULTIPARTIDA ---
+    function autoGuardarSlot() {
+      const data = {
+        board: boardState,
+        history: history,
+        difficulty: difficulty,
+        date: new Date().toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+      };
+      localStorage.setItem(`kora_chess_slot_${currentSlot}`, JSON.stringify(data));
+      actualizarInfoSlots();
+    }
 
-    function instalarApp() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(() => {
-          document.getElementById('install-banner').style.display = 'none';
-          deferredPrompt = null;
-        });
+    function guardarRanura(num) {
+      currentSlot = num;
+      slotIndicator.textContent = `Partida ${currentSlot}`;
+      autoGuardarSlot();
+      cerrarModal();
+    }
+
+    function cargarRanura(num) {
+      const saved = localStorage.getItem(`kora_chess_slot_${num}`);
+      if (saved) {
+        const data = JSON.parse(saved);
+        boardState = data.board;
+        history = data.history || [];
+        setDiff(data.difficulty || 1);
+        currentSlot = num;
+        slotIndicator.textContent = `Partida ${currentSlot}`;
+        selectedSquare = null;
+        validMoves = [];
+        isGameOver = false;
+        statusElem.textContent = "Tu turno (Blancas)";
+        renderBoard();
+        cerrarModal();
+      } else {
+        alert("Esta ranura aún no tiene ninguna partida guardada.");
       }
     }
 
-    // Registrar Service Worker virtual en memoria
-    if ('serviceWorker' in navigator) {
-      const swCode = `self.addEventListener('fetch', function(e) {});`;
-      const blob = new Blob([swCode], { type: 'application/javascript' });
-      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+    function actualizarInfoSlots() {
+      for (let i = 1; i <= 3; i++) {
+        const elem = document.getElementById(`info-slot-${i}`);
+        const saved = localStorage.getItem(`kora_chess_slot_${i}`);
+        if (saved) {
+          const data = JSON.parse(saved);
+          elem.textContent = `Guardada: ${data.date || 'Reciente'}`;
+        } else {
+          elem.textContent = "Vacía";
+        }
+      }
+    }
+
+    function abrirModal() {
+      actualizarInfoSlots();
+      document.getElementById('slots-modal').style.display = 'flex';
+    }
+
+    function cerrarModal() {
+      document.getElementById('slots-modal').style.display = 'none';
+    }
+
+    // Cargar ranura 1 al inicio si existe
+    const slotInicial = localStorage.getItem('kora_chess_slot_1');
+    if (slotInicial) {
+      try {
+        const data = JSON.parse(slotInicial);
+        boardState = data.board;
+        history = data.history || [];
+        setDiff(data.difficulty || 1);
+      } catch (e) {}
     }
 
     renderBoard();
+    actualizarInfoSlots();
   </script>
 </body>
 </html>
