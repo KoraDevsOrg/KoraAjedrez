@@ -3,1545 +3,482 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Ajedrez Clásico - Edición Senior</title>
-  <meta name="theme-color" content="#2b1a0e">
+  <meta name="theme-color" content="#2c1d11">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Ajedrez%20Cl%C3%A1sico%22%2C%22short_name%22%3A%22Ajedrez%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231e130b%22%2C%22theme_color%22%3A%22%232b1a0e%22%7D">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
+  <title>Ajedrez Clásico</title>
+
+  <!-- PWA MANIFEST INTEGRADO -->
+  <link rel="manifest" href="data:application/manifest+json,{
+    %22name%22:%22Ajedrez%20Cl%C3%A1sico%22,
+    %22short_name%22:%22Ajedrez%22,
+    %22start_url%22:%22./index.html%22,
+    %22display%22:%22standalone%22,
+    %22orientation%22:%22portrait%22,
+    %22background_color%22:%22%231c120c%22,
+    %22theme_color%22:%22%232c1d11%22,
+    %22icons%22:[{
+      %22src%22:%22data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%235c3a21'/><text y='75' x='15' font-size='70'>♞</text></svg>%22,
+      %22sizes%22:%22192x192 512x512%22,
+      %22type%22:%22image/svg+xml%22
+    }]
+  }">
+
   <style>
-    /* Estilos de texturas de madera y profundidad realista */
-    :root {
-      --light-square: #f1dfb8;
-      --light-square-accent: #e5cb9b;
-      --dark-square: #a87243;
-      --dark-square-accent: #8b572a;
-      --board-border: #4a2912;
-      --board-bevel: #2b1407;
-    }
-
+    * { box-sizing: border-box; user-select: none; -webkit-user-select: none; margin: 0; padding: 0; }
     body {
-      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      user-select: none;
-      -webkit-user-select: none;
-      touch-action: manipulation;
-      background: radial-gradient(circle at center, #2e1d11 0%, #170d07 100%);
-      color: #f7eedd;
+      background: radial-gradient(circle, #2b1b11 0%, #110a06 100%);
+      color: #f5deb3;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 100vh;
+      padding: 10px;
+      overflow-x: hidden;
     }
-
-    /* Tablero de Madera con Veta y Relieve */
-    .wood-frame {
-      background: linear-gradient(135deg, #583319 0%, #3a1e0b 50%, #200f04 100%);
-      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.75), inset 0 2px 4px rgba(255, 230, 200, 0.25), inset 0 -4px 6px rgba(0, 0, 0, 0.8);
-      border: 3px solid #6b3d1b;
+    header {
+      width: 100%;
+      max-width: 460px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 12px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 10px;
+      border: 1px solid #5a3d28;
     }
-
-    .wood-board {
-      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.65);
+    .status-text { font-size: 1.1rem; font-weight: bold; color: #ffebcd; }
+    .btn {
+      background: linear-gradient(180deg, #8a5a36 0%, #52331c 100%);
+      color: #fff;
+      border: 1px solid #c89666;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.5);
     }
-
-    .square-light {
-      background: radial-gradient(circle at 35% 35%, var(--light-square) 0%, var(--light-square-accent) 100%);
+    .btn:active { transform: translateY(2px); box-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+    
+    /* TABLERO ESTILO MADERA REALISTA */
+    #board-wrapper {
+      width: 100%;
+      max-width: 440px;
+      aspect-ratio: 1 / 1;
+      padding: 12px;
+      background: linear-gradient(135deg, #422517, #1f110a);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.8), inset 0 0 10px rgba(0,0,0,0.7);
+      border: 3px solid #7c4c29;
     }
-
-    .square-dark {
-      background: radial-gradient(circle at 35% 35%, var(--dark-square) 0%, var(--dark-square-accent) 100%);
+    #board {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      grid-template-rows: repeat(8, 1fr);
+      border: 2px solid #231209;
     }
-
-    .square-selected {
-      box-shadow: inset 0 0 0 4px #eab308, inset 0 0 12px rgba(234, 179, 8, 0.6) !important;
-      background-color: rgba(234, 179, 8, 0.3) !important;
+    .square {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(34px, 10vw, 48px);
+      cursor: pointer;
     }
-
-    .square-last-move {
-      box-shadow: inset 0 0 0 3px #38bdf8, inset 0 0 10px rgba(56, 189, 248, 0.4);
-    }
-
-    .square-check {
-      background: radial-gradient(circle, #ef4444 40%, transparent 80%) !important;
-    }
-
-    /* Indicadores de movimientos posibles */
-    .move-dot {
+    .light { background-color: #eed9b3; }
+    .dark { background-color: #9c6c44; }
+    .selected { background-color: #7fac72 !important; }
+    .hint::after {
+      content: "";
       width: 28%;
       height: 28%;
-      background: rgba(30, 60, 20, 0.45);
+      background: rgba(46, 139, 87, 0.7);
       border-radius: 50%;
-      box-shadow: 0 0 6px rgba(0,0,0,0.3);
-      pointer-events: none;
+      position: absolute;
     }
-
-    .capture-ring {
-      width: 82%;
-      height: 82%;
-      border: 4px solid rgba(220, 38, 38, 0.65);
+    .hint.capture::after {
+      width: 75%;
+      height: 75%;
+      background: transparent;
+      border: 4px solid rgba(200, 30, 30, 0.7);
       border-radius: 50%;
-      pointer-events: none;
     }
 
-    /* Piezas vectoriales con sombra física */
-    .piece-svg {
-      width: 86%;
-      height: 86%;
-      filter: drop-shadow(2px 6px 4px rgba(0, 0, 0, 0.55));
-      transition: transform 0.15s ease-out;
+    /* CONTROLES Y NIVELES ACCESIBLES */
+    .controls {
+      width: 100%;
+      max-width: 460px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin: 8px 0;
     }
-
-    .piece-svg:active {
-      transform: scale(1.08);
+    .lvl-btn {
+      padding: 8px 2px;
+      font-size: 0.85rem;
+      background: #331f13;
+      border: 1px solid #6b4324;
+      color: #d1b194;
+      border-radius: 6px;
+      cursor: pointer;
     }
-
-    /* Botones táctiles de gran accesibilidad */
-    .btn-senior {
-      min-height: 54px;
-      touch-action: manipulation;
-      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    .lvl-btn.active {
+      background: #94582f;
+      color: #fff;
+      font-weight: bold;
+      border-color: #ffc285;
     }
-
-    .btn-senior:active {
-      transform: scale(0.96);
+    .actions {
+      width: 100%;
+      max-width: 460px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
     }
-
-    /* Scrollbar estilizada para historial de jugadas */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #8b572a;
-      border-radius: 4px;
+    .actions .btn { flex: 1; padding: 12px; font-size: 1rem; }
+    #install-banner {
+      display: none;
+      width: 100%;
+      max-width: 460px;
+      background: #235429;
+      color: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 6px;
+      border: 1px solid #489e53;
+      cursor: pointer;
+      font-weight: bold;
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between items-center p-2 sm:p-4 select-none">
+<body>
 
-  <!-- CABECERA: TÍTULO, DIFICULTAD E INSTALACIÓN -->
-  <header class="w-full max-w-xl flex items-center justify-between pb-2 border-b border-amber-900/50">
-    <div class="flex items-center gap-2">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-600 to-amber-950 flex items-center justify-center text-amber-100 shadow-md">
-        <i class="fa-solid fa-chess-knight text-2xl"></i>
-      </div>
-      <div>
-        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-amber-100">Ajedrez Clásico</h1>
-        <p class="text-xs text-amber-300 font-medium">100% Gratuito y Sin Anuncios</p>
-      </div>
-    </div>
-
-    <div class="flex items-center gap-2">
-      <!-- Botón de Instalación PWA en Android -->
-      <button id="installAppBtn" class="hidden bg-emerald-700 hover:bg-emerald-600 text-white font-semibold px-3 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-2 shadow-lg border border-emerald-500">
-        <i class="fa-solid fa-download"></i>
-        <span>Instalar App</span>
-      </button>
-
-      <!-- Selector de Menú / Ajustes -->
-      <button onclick="toggleModal('modalSettings', true)" class="bg-amber-950/80 hover:bg-amber-900 text-amber-200 border border-amber-800 p-2.5 rounded-xl shadow">
-        <i class="fa-solid fa-sliders text-lg"></i>
-      </button>
-    </div>
+  <header>
+    <div id="status" class="status-text">Tu turno (Blancas)</div>
+    <div id="ai-status" style="font-size: 0.8rem; color: #ffbf80;">Listo</div>
   </header>
 
-  <!-- PANEL DE ESTADO Y TURNO CLARO (GRANDE Y LEGIBLE) -->
-  <div class="w-full max-w-xl my-2 flex items-center justify-between bg-amber-950/60 border border-amber-800/60 rounded-2xl px-4 py-2.5 shadow-inner">
-    <div class="flex items-center gap-3">
-      <span id="turnIndicatorBadge" class="w-4 h-4 rounded-full bg-white border border-stone-400 shadow inline-block"></span>
-      <div>
-        <p class="text-xs uppercase tracking-wider text-amber-400/80 font-bold">Estado de partida</p>
-        <p id="gameStatusText" class="text-base sm:text-lg font-bold text-amber-50">Tu turno (Blancas)</p>
-      </div>
-    </div>
-    <div class="text-right">
-      <span id="difficultyBadge" class="px-2.5 py-1 bg-amber-900/80 text-amber-200 border border-amber-700 text-xs sm:text-sm font-semibold rounded-lg inline-block">
-        Nivel: Aficionado
-      </span>
-      <div id="aiThinkingIcon" class="hidden text-xs text-amber-300 mt-0.5 animate-pulse flex items-center gap-1 justify-end">
-        <i class="fa-solid fa-gear fa-spin"></i>
-        <span>Calculando jugada...</span>
-      </div>
-    </div>
+  <div id="install-banner" onclick="instalarApp()">
+    📲 Instalar juego en el celular
   </div>
 
-  <!-- TABLERO DE AJEDREZ REALISTA -->
-  <main class="w-full max-w-xl flex flex-col items-center justify-center flex-grow">
-    <div class="wood-frame p-2 sm:p-3 rounded-2xl w-full aspect-square max-w-[480px] shadow-2xl relative">
-      
-      <!-- Contenedor de la Cuadrícula 8x8 -->
-      <div id="chessBoard" class="wood-board w-full h-full grid grid-cols-8 grid-rows-8 rounded-lg overflow-hidden border border-black/40 relative">
-        <!-- Generado dinámicamente -->
-      </div>
-
-    </div>
-
-    <!-- Barra de Piezas Capturadas e Historial condensado -->
-    <div class="w-full max-w-[480px] mt-2 flex items-center justify-between text-xs text-amber-200 px-2">
-      <div id="capturedWhite" class="flex items-center space-x-0.5 h-6 overflow-hidden"></div>
-      <div id="lastMoveNotation" class="font-mono text-sm bg-stone-900/70 px-2 py-0.5 rounded border border-amber-900/60 text-amber-200">
-        Inicio
-      </div>
-      <div id="capturedBlack" class="flex items-center space-x-0.5 h-6 overflow-hidden"></div>
-    </div>
-  </main>
-
-  <!-- CONTROLES PRINCIPALES: BOTONES GRANDES Y CLAROS -->
-  <footer class="w-full max-w-xl grid grid-cols-3 gap-2 mt-2">
-    <!-- Botón Deshacer Jugada -->
-    <button id="undoBtn" onclick="undoMove()" class="btn-senior bg-gradient-to-b from-stone-700 to-stone-800 text-stone-100 font-bold rounded-2xl border border-stone-600 flex flex-col items-center justify-center shadow-lg active:bg-stone-900">
-      <i class="fa-solid fa-arrow-rotate-left text-lg mb-0.5 text-amber-400"></i>
-      <span class="text-xs sm:text-sm">Deshacer</span>
-    </button>
-
-    <!-- Botón Nueva Partida -->
-    <button onclick="toggleModal('modalNewGame', true)" class="btn-senior bg-gradient-to-b from-amber-700 to-amber-900 text-amber-100 font-bold rounded-2xl border border-amber-600 flex flex-col items-center justify-center shadow-lg">
-      <i class="fa-solid fa-plus text-lg mb-0.5 text-amber-300"></i>
-      <span class="text-xs sm:text-sm">Nueva Partida</span>
-    </button>
-
-    <!-- Botón Guardar / Partidas -->
-    <button onclick="toggleModal('modalSlots', true); refreshSlotsUI();" class="btn-senior bg-gradient-to-b from-stone-800 to-amber-950 text-amber-100 font-bold rounded-2xl border border-amber-800/80 flex flex-col items-center justify-center shadow-lg">
-      <i class="fa-solid fa-bookmark text-lg mb-0.5 text-amber-400"></i>
-      <span class="text-xs sm:text-sm">Partidas</span>
-    </button>
-  </footer>
-
-  <!-- MODAL: NUEVA PARTIDA / SELECCIÓN DE DIFICULTAD -->
-  <div id="modalNewGame" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-gradient-to-b from-stone-900 to-amber-950 border-2 border-amber-700 rounded-3xl max-w-md w-full p-5 text-amber-50 shadow-2xl">
-      <div class="flex justify-between items-center mb-3">
-        <h2 class="text-xl font-bold flex items-center gap-2 text-amber-300">
-          <i class="fa-solid fa-chess"></i> Iniciar Nueva Partida
-        </h2>
-        <button onclick="toggleModal('modalNewGame', false)" class="text-amber-400 hover:text-white p-2">
-          <i class="fa-solid fa-xmark text-2xl"></i>
-        </button>
-      </div>
-      <p class="text-sm text-stone-300 mb-4">Selecciona el nivel de habilidad con el que deseas jugar hoy:</p>
-
-      <div class="space-y-2.5">
-        <!-- Nivel 1 -->
-        <button onclick="selectDifficultyAndStart(1)" class="w-full text-left p-3.5 rounded-2xl bg-stone-800/80 hover:bg-amber-900/60 border border-stone-700 hover:border-amber-500 transition flex items-center justify-between">
-          <div>
-            <div class="font-bold text-base text-emerald-400 flex items-center gap-2">
-              <span>Nivel 1: Principiante</span>
-              <span class="text-xs bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800">Relajado</span>
-            </div>
-            <p class="text-xs text-stone-300 mt-1">Juega de forma casual con movimientos sencillos. Ideal para disfrutar sin presión.</p>
-          </div>
-          <i class="fa-solid fa-chevron-right text-stone-500 text-lg"></i>
-        </button>
-
-        <!-- Nivel 2 -->
-        <button onclick="selectDifficultyAndStart(2)" class="w-full text-left p-3.5 rounded-2xl bg-stone-800/80 hover:bg-amber-900/60 border border-stone-700 hover:border-amber-500 transition flex items-center justify-between">
-          <div>
-            <div class="font-bold text-base text-sky-400 flex items-center gap-2">
-              <span>Nivel 2: Aficionado</span>
-              <span class="text-xs bg-sky-950 text-sky-300 px-2 py-0.5 rounded border border-sky-800">Amistoso</span>
-            </div>
-            <p class="text-xs text-stone-300 mt-1">Defiende sus piezas y aprovecha errores evidentes. Una partida entretenida y justa.</p>
-          </div>
-          <i class="fa-solid fa-chevron-right text-stone-500 text-lg"></i>
-        </button>
-
-        <!-- Nivel 3 -->
-        <button onclick="selectDifficultyAndStart(3)" class="w-full text-left p-3.5 rounded-2xl bg-stone-800/80 hover:bg-amber-900/60 border border-stone-700 hover:border-amber-500 transition flex items-center justify-between">
-          <div>
-            <div class="font-bold text-base text-amber-400 flex items-center gap-2">
-              <span>Nivel 3: Estratega</span>
-              <span class="text-xs bg-amber-950 text-amber-300 px-2 py-0.5 rounded border border-amber-800">Desafiante</span>
-            </div>
-            <p class="text-xs text-stone-300 mt-1">Calcula varios movimientos adelante, controla el centro y busca tácticas.</p>
-          </div>
-          <i class="fa-solid fa-chevron-right text-stone-500 text-lg"></i>
-        </button>
-
-        <!-- Nivel 4 -->
-        <button onclick="selectDifficultyAndStart(4)" class="w-full text-left p-3.5 rounded-2xl bg-stone-800/80 hover:bg-amber-900/60 border border-stone-700 hover:border-amber-500 transition flex items-center justify-between">
-          <div>
-            <div class="font-bold text-base text-rose-400 flex items-center gap-2">
-              <span>Nivel 4: Maestro</span>
-              <span class="text-xs bg-rose-950 text-rose-300 px-2 py-0.5 rounded border border-rose-800">Experto</span>
-            </div>
-            <p class="text-xs text-stone-300 mt-1">Máxima precisión de cálculo y conocimiento posicional clásico.</p>
-          </div>
-          <i class="fa-solid fa-chevron-right text-stone-500 text-lg"></i>
-        </button>
-      </div>
-
-      <button onclick="toggleModal('modalNewGame', false)" class="w-full mt-4 py-3 bg-stone-800 hover:bg-stone-700 rounded-xl font-semibold text-stone-300 text-sm">
-        Cancelar y volver a la partida
-      </button>
-    </div>
+  <div id="board-wrapper">
+    <div id="board"></div>
   </div>
 
-  <!-- MODAL: GESTIÓN DE MÚLTIPLES PARTIDAS GUARDADAS -->
-  <div id="modalSlots" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-gradient-to-b from-stone-900 to-amber-950 border-2 border-amber-700 rounded-3xl max-w-md w-full p-5 text-amber-50 shadow-2xl">
-      <div class="flex justify-between items-center mb-3">
-        <h2 class="text-xl font-bold flex items-center gap-2 text-amber-300">
-          <i class="fa-solid fa-folder-open"></i> Múltiples Partidas
-        </h2>
-        <button onclick="toggleModal('modalSlots', false)" class="text-amber-400 hover:text-white p-2">
-          <i class="fa-solid fa-xmark text-2xl"></i>
-        </button>
-      </div>
-      <p class="text-xs sm:text-sm text-stone-300 mb-4">
-        Guarda o retoma tus partidas en cualquier momento sin perder tu progreso:
-      </p>
-
-      <div id="slotsContainer" class="space-y-2.5">
-        <!-- Renderizado dinámico de ranuras 1, 2, 3 -->
-      </div>
-
-      <button onclick="toggleModal('modalSlots', false)" class="w-full mt-4 py-3 bg-amber-900/70 hover:bg-amber-800 border border-amber-700 rounded-xl font-semibold text-amber-100 text-sm">
-        Cerrar Ventana
-      </button>
-    </div>
+  <div class="controls">
+    <button class="lvl-btn active" onclick="setDiff(1)">Fácil</button>
+    <button class="lvl-btn" onclick="setDiff(2)">Medio</button>
+    <button class="lvl-btn" onclick="setDiff(3)">Difícil</button>
+    <button class="lvl-btn" onclick="setDiff(4)">Maestro</button>
   </div>
 
-  <!-- MODAL: CORONACIÓN DE PEÓN SIMPLE Y DIRECTA -->
-  <div id="modalPromotion" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-gradient-to-b from-stone-900 to-amber-950 border-2 border-amber-500 rounded-3xl max-w-sm w-full p-6 text-center text-amber-50 shadow-2xl">
-      <h3 class="text-xl font-bold text-amber-300 mb-1">¡Peón Coronado!</h3>
-      <p class="text-sm text-stone-300 mb-5">Elige en qué pieza deseas transformar tu peón:</p>
-
-      <div class="grid grid-cols-2 gap-3">
-        <button onclick="choosePromotion('q')" class="p-3 bg-amber-900/60 hover:bg-amber-800 border border-amber-600 rounded-2xl flex flex-col items-center">
-          <div class="w-14 h-14" id="promoQueenSvg"></div>
-          <span class="font-bold text-sm mt-1 text-amber-100">Dama</span>
-        </button>
-        <button onclick="choosePromotion('r')" class="p-3 bg-amber-900/60 hover:bg-amber-800 border border-amber-600 rounded-2xl flex flex-col items-center">
-          <div class="w-14 h-14" id="promoRookSvg"></div>
-          <span class="font-bold text-sm mt-1 text-amber-100">Torre</span>
-        </button>
-        <button onclick="choosePromotion('b')" class="p-3 bg-amber-900/60 hover:bg-amber-800 border border-amber-600 rounded-2xl flex flex-col items-center">
-          <div class="w-14 h-14" id="promoBishopSvg"></div>
-          <span class="font-bold text-sm mt-1 text-amber-100">Alfil</span>
-        </button>
-        <button onclick="choosePromotion('n')" class="p-3 bg-amber-900/60 hover:bg-amber-800 border border-amber-600 rounded-2xl flex flex-col items-center">
-          <div class="w-14 h-14" id="promoKnightSvg"></div>
-          <span class="font-bold text-sm mt-1 text-amber-100">Caballo</span>
-        </button>
-      </div>
-    </div>
+  <div class="actions">
+    <button class="btn" onclick="deshacer()">↩ Deshacer</button>
+    <button class="btn" onclick="reiniciarPartida()">🔄 Nueva Partida</button>
   </div>
 
-  <!-- MODAL: AJUSTES E INSTRUCCIONES DE USO / COMPARTIR -->
-  <div id="modalSettings" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-gradient-to-b from-stone-900 to-amber-950 border-2 border-amber-700 rounded-3xl max-w-md w-full p-5 text-amber-50 shadow-2xl max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center mb-3">
-        <h2 class="text-xl font-bold flex items-center gap-2 text-amber-300">
-          <i class="fa-solid fa-circle-info"></i> Ayuda y Ajustes
-        </h2>
-        <button onclick="toggleModal('modalSettings', false)" class="text-amber-400 hover:text-white p-2">
-          <i class="fa-solid fa-xmark text-2xl"></i>
-        </button>
-      </div>
-
-      <div class="space-y-4 text-sm text-stone-300">
-        <!-- Sonido -->
-        <div class="flex items-center justify-between p-3 bg-stone-800/80 rounded-2xl border border-stone-700">
-          <div class="flex items-center gap-3">
-            <i class="fa-solid fa-volume-high text-amber-400 text-lg"></i>
-            <div>
-              <p class="font-bold text-stone-100">Efectos de Sonido</p>
-              <p class="text-xs text-stone-400">Sonido de madera realista al mover</p>
-            </div>
-          </div>
-          <button id="soundToggleBtn" onclick="toggleSound()" class="px-4 py-2 bg-emerald-700 text-white font-bold rounded-xl text-xs">
-            Activado
-          </button>
-        </div>
-
-        <!-- Cómo instalar en celular -->
-        <div class="p-3.5 bg-amber-950/40 border border-amber-800/70 rounded-2xl">
-          <p class="font-bold text-amber-200 mb-1 flex items-center gap-2">
-            <i class="fa-brands fa-android text-emerald-400 text-base"></i> ¿Cómo tenerlo como aplicación?
-          </p>
-          <p class="text-xs text-stone-300 leading-relaxed mb-2">
-            Puedes instalar este juego en la pantalla de tu celular para abrirlo con un toque sin anuncios ni internet:
-          </p>
-          <ol class="list-decimal list-inside text-xs text-stone-300 space-y-1">
-            <li>Toca los tres puntos <i class="fa-solid fa-ellipsis-vertical"></i> arriba a la derecha en Chrome.</li>
-            <li>Selecciona <strong class="text-amber-200">"Agregar a la pantalla principal"</strong> o <strong class="text-amber-200">"Instalar aplicación"</strong>.</li>
-            <li>¡Listo! Aparecerá como un juego normal en tus aplicaciones.</li>
-          </ol>
-        </div>
-
-        <!-- Compartir enlace -->
-        <div class="p-3.5 bg-stone-800/80 border border-stone-700 rounded-2xl">
-          <p class="font-bold text-stone-100 mb-1">Compartir con amigos o familiares</p>
-          <p class="text-xs text-stone-400 mb-3">Envía este juego por WhatsApp para que jueguen sin anuncios.</p>
-          <button onclick="shareGameLink()" class="w-full py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 text-sm shadow">
-            <i class="fa-brands fa-whatsapp text-lg"></i>
-            <span>Compartir Juego</span>
-          </button>
-        </div>
-      </div>
-
-      <button onclick="toggleModal('modalSettings', false)" class="w-full mt-4 py-3 bg-stone-800 hover:bg-stone-700 rounded-xl font-semibold text-stone-300 text-sm">
-        Cerrar
-      </button>
-    </div>
-  </div>
-
-  <!-- AVISO TOAST FLOTANTE -->
-  <div id="toastMessage" class="fixed bottom-24 bg-amber-950 text-amber-100 border border-amber-600 px-4 py-2.5 rounded-2xl shadow-2xl text-sm font-semibold transition-opacity duration-300 opacity-0 pointer-events-none z-50">
-    Mensaje
-  </div>
-
-  <!-- SCRIPT LÓGICO DEL JUEGO: MOTOR, IA Y SONIDOS -->
   <script>
-    /* ==========================================================================
-       1. GENERADOR DE PIEZAS VECTORIALES STAUNTON HIPER-LEGIBLES
-       ========================================================================== */
-    function getPieceSvg(type, color) {
-      const isWhite = color === 'w';
-      
-      // Paleta realista cálida para Staunton tradicional (Marfil cálido vs Ébano lustroso)
-      const fill = isWhite ? '#fbf8eb' : '#221915';
-      const stroke = isWhite ? '#4a3319' : '#e6cfb3';
-      const shadowInner = isWhite ? '#dfd2b5' : '#0e0a08';
-      const detail = isWhite ? '#8d6e46' : '#9f856f';
-
-      const svgPaths = {
-        p: `
-          <!-- Peón Staunton -->
-          <circle cx="25" cy="15" r="7" fill="${fill}" stroke="${stroke}" stroke-width="2"/>
-          <ellipse cx="23" cy="13" rx="2" ry="1.5" fill="white" opacity="${isWhite ? '0.6' : '0.1'}"/>
-          <path d="M19 22 C19 20, 31 20, 31 22 C31 24, 28 25, 28 32 L34 40 L16 40 L22 32 C22 25, 19 24, 19 22 Z" fill="${fill}" stroke="${stroke}" stroke-width="2"/>
-          <path d="M14 40 L36 40 C37 40, 38 41, 38 43 L12 43 C12 41, 13 40, 14 40 Z" fill="${shadowInner}" stroke="${stroke}" stroke-width="2"/>
-        `,
-        r: `
-          <!-- Torre Staunton -->
-          <path d="M16 14 L16 20 L20 20 L20 17 L24 17 L24 20 L26 20 L26 17 L30 17 L30 20 L34 20 L34 14 Z" fill="${fill}" stroke="${stroke}" stroke-width="2"/>
-          <path d="M18 20 L32 20 L30 36 L20 36 Z" fill="${fill}" stroke="${stroke}" stroke-width="2"/>
-          <path d="M15 36 L35 36 C36 36, 38 38, 38 43 L12 43 C12 38, 14 36, 15 36 Z" fill="${shadowInner}" stroke="${stroke}" stroke-width="2"/>
-          <line x1="17" y1="26" x2="33" y2="26" stroke="${detail}" stroke-width="1.5"/>
-        `,
-        n: `
-          <!-- Caballo Staunton -->
-          <path d="M14 42 C14 36, 17 33, 19 30 C15 28, 14 23, 16 19 C18 16, 22 13, 26 12 C28 10, 31 11, 32 13 C34 16, 33 21, 36 24 C38 26, 38 31, 36 34 L34 33 C33 36, 31 40, 36 42 Z" fill="${fill}" stroke="${stroke}" stroke-width="2"/>
-          <circle cx="21" cy="20" r="1.5" fill="${detail}"/>
-          <path d="M26 18 C28 20, 29 23, 27 25" stroke="${detail}" stroke-width="1.5" fill="none"/>
-          <path d="M12 42 L38 42 C38 44, 37 45, 36 45 L14 45 C13 45, 12 44, 12 42 Z" fill="${shadowInner}" stroke="${stroke}" stroke-width="2"/>
-        `,
-        b: `
-          <!-- Alfil Staunton con mitra -->
-          <circle cx="25" cy="11" r="2.5" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
-          <path d="M20 22 C18 17, 21 14, 25 14 C29 14, 32 17, 30 22 C30 26, 28 28, 27 34 L23 34 C22 28, 20 26, 20 22 Z" fill="${fill}" stroke="${stroke}" stroke-width="2"/>
-          <path d="M23 18 L28 23" stroke="${stroke}" stroke-width="2"/>
-          <path d="M15 38 L35 38 C37 38, 38 40, 38 43 L12 43 C12 40, 13 38, 15 38 Z" fill="${shadowInner}" stroke="${stroke}" stroke-width="2"/>
-        `,
-        q: `
-          <!-- Dama con corona -->
-          <circle cx="15" cy="15" r="2" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
-          <circle cx="20" cy="13" r="2" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
-          <circle cx="25" cy="12" r="2" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
-          <circle cx="30" cy="13" r="2" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
-          <circle cx="35" cy="15" r="2" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
-          <path d="M14 18 L18 32 L32 32 L36 18 L31 24 L25 16 L19 24 Z" fill="${fill}" stroke="${stroke}" stroke-width="2"/>
-          <path d="M14 36 L36 36 C37 36, 38 38, 38 43 L12 43 C12 38, 13 36, 14 36 Z" fill="${shadowInner}" stroke="${stroke}" stroke-width="2"/>
-        `,
-        k: `
-          <!-- Rey con Cruz Imperial -->
-          <path d="M25 8 L25 14 M22 11 L28 11" stroke="${stroke}" stroke-width="2"/>
-          <path d="M18 19 C18 15, 32 15, 32 19 C32 23, 29 25, 28 34 L22 34 C21 25, 18 23, 18 19 Z" fill="${fill}" stroke="${stroke}" stroke-width="2"/>
-          <path d="M17 21 C21 25, 29 25, 33 21" stroke="${detail}" stroke-width="1.5" fill="none"/>
-          <path d="M14 36 L36 36 C37 36, 38 38, 38 43 L12 43 C12 38, 13 36, 14 36 Z" fill="${shadowInner}" stroke="${stroke}" stroke-width="2"/>
-        `
-      };
-
-      return `
-        <svg viewBox="0 0 50 50" class="piece-svg" xmlns="http://www.w3.org/2000/svg">
-          ${svgPaths[type.toLowerCase()] || ''}
-        </svg>
-      `;
+    // --- AUDIO SINTETIZADO CON WEB AUDIO API (100% OFFLINE) ---
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let actx = null;
+    function playWoodSound(capture = false) {
+      if (!actx) actx = new AudioCtx();
+      const osc = actx.createOscillator();
+      const gain = actx.createGain();
+      osc.type = capture ? "sawtooth" : "triangle";
+      osc.frequency.setValueAtTime(capture ? 140 : 220, actx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(30, actx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.4, actx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.08);
+      osc.connect(gain);
+      gain.connect(actx.destination);
+      osc.start();
+      osc.stop(actx.currentTime + 0.08);
     }
 
-    /* ==========================================================================
-       2. SINTETIZADOR DE AUDIO REALISTA (WEB AUDIO API - SIN EXTERNOS)
-       ========================================================================== */
-    class ChessSoundEngine {
-      constructor() {
-        this.ctx = null;
-        this.enabled = true;
-      }
+    // --- REPRESENTACIÓN SIMPLIFICADA DEL TABLERO ---
+    const SYMBOLS = {
+      'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'p': '♟',
+      'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔', 'P': '♙'
+    };
 
-      init() {
-        if (!this.ctx) {
-          const AudioContext = window.AudioContext || window.webkitAudioContext;
-          if (AudioContext) {
-            this.ctx = new AudioContext();
+    let boardState = [
+      ['r','n','b','q','k','b','n','r'],
+      ['p','p','p','p','p','p','p','p'],
+      ['','','','','','','',''],
+      ['','','','','','','',''],
+      ['','','','','','','',''],
+      ['','','','','','','',''],
+      ['P','P','P','P','P','P','P','P'],
+      ['R','N','B','Q','K','B','N','R']
+    ];
+
+    let history = [];
+    let selectedSquare = null;
+    let validMoves = [];
+    let difficulty = 1;
+    let isGameOver = false;
+
+    const boardElem = document.getElementById("board");
+    const statusElem = document.getElementById("status");
+    const aiStatusElem = document.getElementById("ai-status");
+
+    function renderBoard() {
+      boardElem.innerHTML = '';
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const sq = document.createElement("div");
+          sq.className = `square ${(r + c) % 2 === 0 ? 'light' : 'dark'}`;
+          sq.dataset.row = r;
+          sq.dataset.col = c;
+
+          const piece = boardState[r][c];
+          if (piece) {
+            sq.textContent = SYMBOLS[piece];
+            sq.style.color = piece === piece.toUpperCase() ? '#fffbe6' : '#140c06';
+            sq.style.textShadow = piece === piece.toUpperCase() ? '0 2px 4px #000' : '0 1px 2px #fff8';
           }
+
+          if (selectedSquare && selectedSquare.r === r && selectedSquare.c === c) {
+            sq.classList.add("selected");
+          }
+
+          const move = validMoves.find(m => m.r === r && m.c === c);
+          if (move) {
+            sq.classList.add("hint");
+            if (boardState[r][c] !== '') sq.classList.add("capture");
+          }
+
+          sq.addEventListener("click", () => handleSquareClick(r, c));
+          boardElem.appendChild(sq);
         }
-        if (this.ctx && this.ctx.state === 'suspended') {
-          this.ctx.resume();
-        }
-      }
-
-      playMoveSound() {
-        if (!this.enabled) return;
-        this.init();
-        if (!this.ctx) return;
-
-        try {
-          // Golpe sordo de madera sólida contra paño
-          const now = this.ctx.currentTime;
-          const osc = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
-
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(140, now);
-          osc.frequency.exponentialRampToValueAtTime(35, now + 0.08);
-
-          gain.gain.setValueAtTime(0.7, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
-
-          osc.connect(gain);
-          gain.connect(this.ctx.destination);
-
-          osc.start(now);
-          osc.stop(now + 0.09);
-        } catch(e) {}
-      }
-
-      playCaptureSound() {
-        if (!this.enabled) return;
-        this.init();
-        if (!this.ctx) return;
-
-        try {
-          // Impacto de choque de madera doble más enérgico
-          const now = this.ctx.currentTime;
-          const osc1 = this.ctx.createOscillator();
-          const osc2 = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
-
-          osc1.type = 'sine';
-          osc1.frequency.setValueAtTime(280, now);
-          osc1.frequency.exponentialRampToValueAtTime(50, now + 0.12);
-
-          osc2.type = 'triangle';
-          osc2.frequency.setValueAtTime(180, now);
-          osc2.frequency.exponentialRampToValueAtTime(40, now + 0.12);
-
-          gain.gain.setValueAtTime(0.8, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-
-          osc1.connect(gain);
-          osc2.connect(gain);
-          gain.connect(this.ctx.destination);
-
-          osc1.start(now);
-          osc2.start(now);
-          osc1.stop(now + 0.12);
-          osc2.stop(now + 0.12);
-        } catch(e) {}
       }
     }
 
-    const sound = new ChessSoundEngine();
+    function isWhite(piece) { return piece && piece === piece.toUpperCase(); }
+    function isBlack(piece) { return piece && piece === piece.toLowerCase(); }
 
-    /* ==========================================================================
-       3. REGLAS COMPLETAS DE AJEDREZ (MOTOR INTEGRADO ROBUSTO)
-       ========================================================================== */
-    class ChessEngine {
-      constructor() {
-        this.reset();
-      }
+    function getBasicMoves(r, c, state) {
+      const p = state[r][c];
+      const moves = [];
+      const white = isWhite(p);
+      const enemyCheck = white ? isBlack : isWhite;
 
-      reset() {
-        // Tablero 8x8: r=0 fila 8 (Negras), r=7 fila 1 (Blancas)
-        this.board = [
-          ['br','bn','bb','bq','bk','bb','bn','br'],
-          ['bp','bp','bp','bp','bp','bp','bp','bp'],
-          [null,null,null,null,null,null,null,null],
-          [null,null,null,null,null,null,null,null],
-          [null,null,null,null,null,null,null,null],
-          [null,null,null,null,null,null,null,null],
-          ['wp','wp','wp','wp','wp','wp','wp','wp'],
-          ['wr','wn','wb','wq','wk','wb','wn','wr']
-        ];
-        this.turn = 'w';
-        this.castling = { wK: true, wQ: true, bK: true, bQ: true };
-        this.enPassant = null; // [r, c]
-        this.moveHistory = [];
-        this.capturedWhite = [];
-        this.capturedBlack = [];
-        this.lastMove = null;
-        this.isGameOver = false;
-        this.statusMessage = 'Tu turno (Blancas)';
-      }
-
-      cloneBoard(board) {
-        return board.map(row => [...row]);
-      }
-
-      isInside(r, c) {
-        return r >= 0 && r < 8 && c >= 0 && c < 8;
-      }
-
-      getPieceColor(piece) {
-        return piece ? piece[0] : null;
-      }
-
-      getPieceType(piece) {
-        return piece ? piece[1] : null;
-      }
-
-      // Generación de movimientos pseudo-legales
-      generatePseudoMoves(color, b = this.board, castling = this.castling, enPassant = this.enPassant) {
-        const moves = [];
-        const dirPawns = color === 'w' ? -1 : 1;
-        const startRowPawn = color === 'w' ? 6 : 1;
-
-        for (let r = 0; r < 8; r++) {
-          for (let c = 0; c < 8; c++) {
-            const piece = b[r][c];
-            if (!piece || this.getPieceColor(piece) !== color) continue;
-            const type = this.getPieceType(piece);
-
-            // PEÓN
-            if (type === 'p') {
-              // Avance 1 casilla
-              const nr = r + dirPawns;
-              if (this.isInside(nr, c) && !b[nr][c]) {
-                moves.push({ from: [r, c], to: [nr, c] });
-                // Avance doble inicial
-                const nnr = r + (dirPawns * 2);
-                if (r === startRowPawn && !b[nnr][c]) {
-                  moves.push({ from: [r, c], to: [nnr, c], isPawnDouble: true });
-                }
-              }
-              // Capturas diagonales
-              for (let dc of [-1, 1]) {
-                const nc = c + dc;
-                if (this.isInside(nr, nc)) {
-                  const target = b[nr][nc];
-                  if (target && this.getPieceColor(target) !== color) {
-                    moves.push({ from: [r, c], to: [nr, nc], capture: true });
-                  } else if (enPassant && enPassant[0] === nr && enPassant[1] === nc) {
-                    moves.push({ from: [r, c], to: [nr, nc], isEnPassant: true, capture: true });
-                  }
-                }
-              }
-            }
-
-            // CABALLO
-            if (type === 'n') {
-              const knightDeltas = [
-                [-2, -1], [-2, 1], [-1, -2], [-1, 2],
-                [1, -2], [1, 2], [2, -1], [2, 1]
-              ];
-              for (let [dr, dc] of knightDeltas) {
-                const nr = r + dr;
-                const nc = c + dc;
-                if (this.isInside(nr, nc)) {
-                  const dest = b[nr][nc];
-                  if (!dest || this.getPieceColor(dest) !== color) {
-                    moves.push({ from: [r, c], to: [nr, nc], capture: !!dest });
-                  }
-                }
-              }
-            }
-
-            // ALFIL, TORRE, DAMA (Líneas rectas / Diagonales)
-            if (type === 'b' || type === 'r' || type === 'q') {
-              const directions = [];
-              if (type === 'b' || type === 'q') {
-                directions.push([-1,-1], [-1,1], [1,-1], [1,1]);
-              }
-              if (type === 'r' || type === 'q') {
-                directions.push([-1,0], [1,0], [0,-1], [0,1]);
-              }
-
-              for (let [dr, dc] of directions) {
-                let step = 1;
-                while (true) {
-                  const nr = r + (dr * step);
-                  const nc = c + (dc * step);
-                  if (!this.isInside(nr, nc)) break;
-                  const dest = b[nr][nc];
-                  if (!dest) {
-                    moves.push({ from: [r, c], to: [nr, nc] });
-                  } else {
-                    if (this.getPieceColor(dest) !== color) {
-                      moves.push({ from: [r, c], to: [nr, nc], capture: true });
-                    }
-                    break;
-                  }
-                  step++;
-                }
-              }
-            }
-
-            // REY
-            if (type === 'k') {
-              for (let dr = -1; dr <= 1; dr++) {
-                for (let dc = -1; dc <= 1; dc++) {
-                  if (dr === 0 && dc === 0) continue;
-                  const nr = r + dr;
-                  const nc = c + dc;
-                  if (this.isInside(nr, nc)) {
-                    const dest = b[nr][nc];
-                    if (!dest || this.getPieceColor(dest) !== color) {
-                      moves.push({ from: [r, c], to: [nr, nc], capture: !!dest });
-                    }
-                  }
-                }
-              }
-
-              // Enroque
-              if (color === 'w' && r === 7 && c === 4) {
-                if (castling.wK && !b[7][5] && !b[7][6] && b[7][7] === 'wr') {
-                  moves.push({ from: [7,4], to: [7,6], isCastle: 'K' });
-                }
-                if (castling.wQ && !b[7][3] && !b[7][2] && !b[7][1] && b[7][0] === 'wr') {
-                  moves.push({ from: [7,4], to: [7,2], isCastle: 'Q' });
-                }
-              } else if (color === 'b' && r === 0 && c === 4) {
-                if (castling.bK && !b[0][5] && !b[0][6] && b[0][7] === 'br') {
-                  moves.push({ from: [0,4], to: [0,6], isCastle: 'K' });
-                }
-                if (castling.bQ && !b[0][3] && !b[0][2] && !b[0][1] && b[0][0] === 'br') {
-                  moves.push({ from: [0,4], to: [0,2], isCastle: 'Q' });
-                }
-              }
-            }
+      // Peones simplificados
+      if (p.toLowerCase() === 'p') {
+        const dir = white ? -1 : 1;
+        if (state[r + dir] && state[r + dir][c] === '') {
+          moves.push({ r: r + dir, c: c });
+          if ((white && r === 6) || (!white && r === 1)) {
+            if (state[r + dir * 2][c] === '') moves.push({ r: r + dir * 2, c: c });
           }
         }
-        return moves;
+        [-1, 1].forEach(dc => {
+          if (state[r + dir] && enemyCheck(state[r + dir][c + dc])) {
+            moves.push({ r: r + dir, c: c + dc });
+          }
+        });
       }
 
-      // Comprobar si una casilla está bajo ataque por el oponente
-      isSquareAttacked(targetR, targetC, opponentColor, b = this.board) {
-        const dirPawns = opponentColor === 'w' ? -1 : 1;
-        // Peones atacando
-        const pawnR = targetR - dirPawns;
-        for (let pawnC of [targetC - 1, targetC + 1]) {
-          if (this.isInside(pawnR, pawnC)) {
-            const p = b[pawnR][pawnC];
-            if (p === opponentColor + 'p') return true;
+      // Caballos
+      if (p.toLowerCase() === 'n') {
+        [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]].forEach(([dr, dc]) => {
+          const nr = r + dr, nc = c + dc;
+          if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+            if (state[nr][nc] === '' || enemyCheck(state[nr][nc])) moves.push({ r: nr, c: nc });
           }
-        }
+        });
+      }
 
-        // Caballos atacando
-        const knightDeltas = [
-          [-2, -1], [-2, 1], [-1, -2], [-1, 2],
-          [1, -2], [1, 2], [2, -1], [2, 1]
-        ];
-        for (let [dr, dc] of knightDeltas) {
-          const nr = targetR + dr;
-          const nc = targetC + dc;
-          if (this.isInside(nr, nc)) {
-            if (b[nr][nc] === opponentColor + 'n') return true;
+      // Rayas (Torre, Alfil, Reina)
+      const dirs = [];
+      if (['r', 'q'].includes(p.toLowerCase())) dirs.push([-1,0],[1,0],[0,-1],[0,1]);
+      if (['b', 'q'].includes(p.toLowerCase())) dirs.push([-1,-1],[-1,1],[1,-1],[1,1]);
+
+      dirs.forEach(([dr, dc]) => {
+        let step = 1;
+        while (true) {
+          const nr = r + dr * step, nc = c + dc * step;
+          if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8) break;
+          if (state[nr][nc] === '') {
+            moves.push({ r: nr, c: nc });
+          } else {
+            if (enemyCheck(state[nr][nc])) moves.push({ r: nr, c: nc });
+            break;
           }
+          step++;
         }
+      });
 
-        // Rey atacando (casillas adyacentes)
+      // Rey
+      if (p.toLowerCase() === 'k') {
         for (let dr = -1; dr <= 1; dr++) {
           for (let dc = -1; dc <= 1; dc++) {
             if (dr === 0 && dc === 0) continue;
-            const nr = targetR + dr;
-            const nc = targetC + dc;
-            if (this.isInside(nr, nc)) {
-              if (b[nr][nc] === opponentColor + 'k') return true;
+            const nr = r + dr, nc = c + dc;
+            if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+              if (state[nr][nc] === '' || enemyCheck(state[nr][nc])) moves.push({ r: nr, c: nc });
             }
           }
         }
-
-        // Torres / Damas (Ortogonales)
-        const straightDirs = [[-1,0], [1,0], [0,-1], [0,1]];
-        for (let [dr, dc] of straightDirs) {
-          let step = 1;
-          while (true) {
-            const nr = targetR + (dr * step);
-            const nc = targetC + (dc * step);
-            if (!this.isInside(nr, nc)) break;
-            const p = b[nr][nc];
-            if (p) {
-              if (p === opponentColor + 'r' || p === opponentColor + 'q') return true;
-              break;
-            }
-            step++;
-          }
-        }
-
-        // Alfiles / Damas (Diagonales)
-        const diagDirs = [[-1,-1], [-1,1], [1,-1], [1,1]];
-        for (let [dr, dc] of diagDirs) {
-          let step = 1;
-          while (true) {
-            const nr = targetR + (dr * step);
-            const nc = targetC + (dc * step);
-            if (!this.isInside(nr, nc)) break;
-            const p = b[nr][nc];
-            if (p) {
-              if (p === opponentColor + 'b' || p === opponentColor + 'q') return true;
-              break;
-            }
-            step++;
-          }
-        }
-
-        return false;
       }
-
-      findKing(color, b = this.board) {
-        for (let r = 0; r < 8; r++) {
-          for (let c = 0; c < 8; c++) {
-            if (b[r][c] === color + 'k') return [r, c];
-          }
-        }
-        return null;
-      }
-
-      isInCheck(color, b = this.board) {
-        const kingPos = this.findKing(color, b);
-        if (!kingPos) return false;
-        const opponent = color === 'w' ? 'b' : 'w';
-        return this.isSquareAttacked(kingPos[0], kingPos[1], opponent, b);
-      }
-
-      // Validar movimientos legales (filtrando los que dejan al rey propio en jaque)
-      getLegalMoves(color = this.turn) {
-        const pseudoMoves = this.generatePseudoMoves(color, this.board, this.castling, this.enPassant);
-        const legalMoves = [];
-        const opponent = color === 'w' ? 'b' : 'w';
-
-        for (let m of pseudoMoves) {
-          // Chequeo de Enroque: no puede hacerse si está en jaque o pasa por casilla atacada
-          if (m.isCastle) {
-            if (this.isInCheck(color, this.board)) continue;
-            const r = m.from[0];
-            if (m.isCastle === 'K') {
-              if (this.isSquareAttacked(r, 5, opponent, this.board)) continue;
-              if (this.isSquareAttacked(r, 6, opponent, this.board)) continue;
-            } else if (m.isCastle === 'Q') {
-              if (this.isSquareAttacked(r, 3, opponent, this.board)) continue;
-              if (this.isSquareAttacked(r, 2, opponent, this.board)) continue;
-            }
-          }
-
-          // Simular movimiento
-          const simBoard = this.cloneBoard(this.board);
-          const movingPiece = simBoard[m.from[0]][m.from[1]];
-          simBoard[m.to[0]][m.to[1]] = movingPiece;
-          simBoard[m.from[0]][m.from[1]] = null;
-
-          if (m.isEnPassant) {
-            const pawnDir = color === 'w' ? 1 : -1;
-            simBoard[m.to[0] + pawnDir][m.to[1]] = null;
-          }
-
-          // Verificar si el rey queda en jaque
-          if (!this.isInCheck(color, simBoard)) {
-            legalMoves.push(m);
-          }
-        }
-        return legalMoves;
-      }
-
-      // Ejecutar jugada en el motor
-      makeMove(move, promotionPiece = 'q') {
-        const { from, to } = move;
-        const piece = this.board[from[0]][from[1]];
-        const color = this.getPieceColor(piece);
-        const type = this.getPieceType(piece);
-        let captured = this.board[to[0]][to[1]];
-
-        // Guardar snapshot para deshacer
-        this.moveHistory.push({
-          board: this.cloneBoard(this.board),
-          castling: { ...this.castling },
-          enPassant: this.enPassant ? [...this.enPassant] : null,
-          turn: this.turn,
-          capturedWhite: [...this.capturedWhite],
-          capturedBlack: [...this.capturedBlack],
-          lastMove: this.lastMove
-        });
-
-        // Manejo de En Passant
-        if (move.isEnPassant) {
-          const pawnRowDir = color === 'w' ? 1 : -1;
-          captured = this.board[to[0] + pawnRowDir][to[1]];
-          this.board[to[0] + pawnRowDir][to[1]] = null;
-        }
-
-        if (captured) {
-          if (color === 'w') this.capturedWhite.push(captured);
-          else this.capturedBlack.push(captured);
-        }
-
-        // Mover pieza
-        this.board[to[0]][to[1]] = piece;
-        this.board[from[0]][from[1]] = null;
-
-        // Coronación de Peón
-        if (type === 'p' && (to[0] === 0 || to[0] === 7)) {
-          this.board[to[0]][to[1]] = color + promotionPiece.toLowerCase();
-        }
-
-        // Manejo de Enroque (mover torre acompañante)
-        if (move.isCastle) {
-          const r = to[0];
-          if (move.isCastle === 'K') {
-            this.board[r][5] = this.board[r][7];
-            this.board[r][7] = null;
-          } else {
-            this.board[r][3] = this.board[r][0];
-            this.board[r][0] = null;
-          }
-        }
-
-        // Actualizar derechos de enroque
-        if (type === 'k') {
-          if (color === 'w') { this.castling.wK = false; this.castling.wQ = false; }
-          else { this.castling.bK = false; this.castling.bQ = false; }
-        }
-        if (type === 'r') {
-          if (from[0] === 7 && from[1] === 7) this.castling.wK = false;
-          if (from[0] === 7 && from[1] === 0) this.castling.wQ = false;
-          if (from[0] === 0 && from[1] === 7) this.castling.bK = false;
-          if (from[0] === 0 && from[1] === 0) this.castling.bQ = false;
-        }
-
-        // Actualizar casilla En Passant
-        if (move.isPawnDouble) {
-          this.enPassant = [(from[0] + to[0]) / 2, from[1]];
-        } else {
-          this.enPassant = null;
-        }
-
-        this.lastMove = move;
-        this.turn = (this.turn === 'w') ? 'b' : 'w';
-
-        // Comprobar Fin de Partida
-        const nextLegalMoves = this.getLegalMoves(this.turn);
-        if (nextLegalMoves.length === 0) {
-          this.isGameOver = true;
-          if (this.isInCheck(this.turn, this.board)) {
-            const winner = this.turn === 'w' ? 'Negras' : 'Blancas';
-            this.statusMessage = `¡Jaque Mate! Ganan las ${winner}`;
-          } else {
-            this.statusMessage = 'Tablas por Rey Ahogado';
-          }
-        } else {
-          if (this.isInCheck(this.turn, this.board)) {
-            this.statusMessage = `¡Jaque a las ${this.turn === 'w' ? 'Blancas' : 'Negras'}!`;
-          } else {
-            this.statusMessage = this.turn === 'w' ? 'Tu turno (Blancas)' : 'Pensando movimiento...';
-          }
-        }
-
-        return captured;
-      }
-
-      undo() {
-        if (this.moveHistory.length === 0) return false;
-        const prev = this.moveHistory.pop();
-        this.board = prev.board;
-        this.castling = prev.castling;
-        this.enPassant = prev.enPassant;
-        this.turn = prev.turn;
-        this.capturedWhite = prev.capturedWhite;
-        this.capturedBlack = prev.capturedBlack;
-        this.lastMove = prev.lastMove;
-        this.isGameOver = false;
-        this.statusMessage = this.turn === 'w' ? 'Tu turno (Blancas)' : 'Pensando movimiento...';
-        return true;
-      }
+      return moves;
     }
 
-    /* ==========================================================================
-       4. INTELIGENCIA ARTIFICIAL CLÁSICA (NIVELES 1 A 4)
-       ========================================================================== */
-    // Tablas de valores posicionales de piezas clásicas (PST) para estilo Staunton táctico
-    const PIECE_VALUES = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000 };
-
-    const PAWN_TABLE = [
-      [0,  0,  0,  0,  0,  0,  0,  0],
-      [50, 50, 50, 50, 50, 50, 50, 50],
-      [10, 10, 20, 30, 30, 20, 10, 10],
-      [5,  5, 10, 25, 25, 10,  5,  5],
-      [0,  0,  0, 20, 20,  0,  0,  0],
-      [5, -5,-10,  0,  0,-10, -5,  5],
-      [5, 10, 10,-20,-20, 10, 10,  5],
-      [0,  0,  0,  0,  0,  0,  0,  0]
-    ];
-
-    const KNIGHT_TABLE = [
-      [-50,-40,-30,-30,-30,-30,-40,-50],
-      [-40,-20,  0,  0,  0,  0,-20,-40],
-      [-30,  0, 10, 15, 15, 10,  0,-30],
-      [-30,  5, 15, 20, 20, 15,  5,-30],
-      [-30,  0, 15, 20, 20, 15,  0,-30],
-      [-30,  5, 10, 15, 15, 10,  5,-30],
-      [-40,-20,  0,  5,  5,  0,-20,-40],
-      [-50,-40,-30,-30,-30,-30,-40,-50]
-    ];
-
-    function evaluateBoard(board) {
-      let score = 0;
-      for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-          const piece = board[r][c];
-          if (!piece) continue;
-          const color = piece[0];
-          const type = piece[1];
-
-          let val = PIECE_VALUES[type] || 0;
-          let tableBonus = 0;
-
-          // Bono posicional para orientar a la IA a controlar el centro
-          if (type === 'p') {
-            tableBonus = color === 'w' ? PAWN_TABLE[r][c] : PAWN_TABLE[7 - r][c];
-          } else if (type === 'n') {
-            tableBonus = color === 'w' ? KNIGHT_TABLE[r][c] : KNIGHT_TABLE[7 - r][c];
-          }
-
-          val += tableBonus;
-          score += (color === 'b' ? val : -val);
-        }
-      }
-      return score;
-    }
-
-    function getAIMove(engine, difficulty) {
-      const legalMoves = engine.getLegalMoves('b');
-      if (legalMoves.length === 0) return null;
-
-      // Nivel 1: Principiante (casual con pequeños descuidos)
-      if (difficulty === 1) {
-        // 65% aleatorio, 35% captura simple si existe
-        const captures = legalMoves.filter(m => m.capture);
-        if (captures.length > 0 && Math.random() < 0.35) {
-          return captures[Math.floor(Math.random() * captures.length)];
-        }
-        return legalMoves[Math.floor(Math.random() * legalMoves.length)];
-      }
-
-      // Nivel 2: Aficionado (evaluación de capturas y ganancia material a 1 jugada)
-      if (difficulty === 2) {
-        let bestMove = legalMoves[0];
-        let bestVal = -Infinity;
-
-        // Mezclar para no jugar siempre la misma apertura
-        legalMoves.sort(() => Math.random() - 0.5);
-
-        for (let m of legalMoves) {
-          const sim = engine.cloneBoard(engine.board);
-          sim[m.to[0]][m.to[1]] = sim[m.from[0]][m.from[1]];
-          sim[m.from[0]][m.from[1]] = null;
-
-          let val = evaluateBoard(sim);
-          // Si captura añade bonificación visible
-          if (m.capture) val += 40;
-
-          if (val > bestVal) {
-            bestVal = val;
-            bestMove = m;
-          }
-        }
-        return bestMove;
-      }
-
-      // Nivel 3 y 4: Minimax con poda Alfa-Beta (Profundidad 2 para nivel 3, 3 para nivel 4)
-      const depth = difficulty === 3 ? 2 : 3;
-
-      function minimax(currBoard, d, isMax, alpha, beta) {
-        if (d === 0) return evaluateBoard(currBoard);
-
-        const color = isMax ? 'b' : 'w';
-        const moves = engine.generatePseudoMoves(color, currBoard, engine.castling, engine.enPassant);
-        if (moves.length === 0) return isMax ? -10000 : 10000;
-
-        if (isMax) {
-          let maxEval = -Infinity;
-          for (let m of moves) {
-            const nextB = engine.cloneBoard(currBoard);
-            nextB[m.to[0]][m.to[1]] = nextB[m.from[0]][m.from[1]];
-            nextB[m.from[0]][m.from[1]] = null;
-            const ev = minimax(nextB, d - 1, false, alpha, beta);
-            maxEval = Math.max(maxEval, ev);
-            alpha = Math.max(alpha, ev);
-            if (beta <= alpha) break;
-          }
-          return maxEval;
-        } else {
-          let minEval = Infinity;
-          for (let m of moves) {
-            const nextB = engine.cloneBoard(currBoard);
-            nextB[m.to[0]][m.to[1]] = nextB[m.from[0]][m.from[1]];
-            nextB[m.from[0]][m.from[1]] = null;
-            const ev = minimax(nextB, d - 1, true, alpha, beta);
-            minEval = Math.min(minEval, ev);
-            beta = Math.min(beta, ev);
-            if (beta <= alpha) break;
-          }
-          return minEval;
-        }
-      }
-
-      let bestScore = -Infinity;
-      let chosenMove = legalMoves[0];
-      legalMoves.sort(() => Math.random() - 0.5);
-
-      for (let m of legalMoves) {
-        const nextB = engine.cloneBoard(engine.board);
-        nextB[m.to[0]][m.to[1]] = nextB[m.from[0]][m.from[1]];
-        nextB[m.from[0]][m.from[1]] = null;
-
-        const score = minimax(nextB, depth - 1, false, -Infinity, Infinity);
-        if (score > bestScore) {
-          bestScore = score;
-          chosenMove = m;
-        }
-      }
-
-      return chosenMove;
-    }
-
-    /* ==========================================================================
-       5. CONTROLADOR PRINCIPAL Y GESTIÓN DE PARTIDAS
-       ========================================================================== */
-    const chess = new ChessEngine();
-    let currentDifficulty = 2; // Default Aficionado
-    let selectedSquare = null;
-    let legalMovesForSelected = [];
-    let pendingPromotionMove = null;
-    let currentSlot = 1;
-
-    const diffNames = {
-      1: 'Principiante',
-      2: 'Aficionado',
-      3: 'Estratega',
-      4: 'Maestro'
-    };
-
-    // Inicializar Tablero en DOM
-    function renderBoard() {
-      const boardEl = document.getElementById('chessBoard');
-      boardEl.innerHTML = '';
-
-      const kingCheckPos = chess.isInCheck(chess.turn) ? chess.findKing(chess.turn) : null;
-
-      for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-          const square = document.createElement('div');
-          const isLight = (r + c) % 2 === 0;
-          square.className = `w-full h-full relative flex items-center justify-center cursor-pointer ${isLight ? 'square-light' : 'square-dark'}`;
-          square.dataset.row = r;
-          square.dataset.col = c;
-
-          // Resaltar última jugada
-          if (chess.lastMove) {
-            const { from, to } = chess.lastMove;
-            if ((from[0] === r && from[1] === c) || (to[0] === r && to[1] === c)) {
-              square.classList.add('square-last-move');
-            }
-          }
-
-          // Resaltar selección actual
-          if (selectedSquare && selectedSquare[0] === r && selectedSquare[1] === c) {
-            square.classList.add('square-selected');
-          }
-
-          // Resaltar jaque al rey
-          if (kingCheckPos && kingCheckPos[0] === r && kingCheckPos[1] === c) {
-            square.classList.add('square-check');
-          }
-
-          // Renderizar pieza
-          const piece = chess.board[r][c];
-          if (piece) {
-            square.innerHTML = getPieceSvg(piece[1], piece[0]);
-          }
-
-          // Marcar movimientos legales posibles si la casilla fue tocada
-          const isLegalTarget = legalMovesForSelected.some(m => m.to[0] === r && m.to[1] === c);
-          if (isLegalTarget) {
-            const marker = document.createElement('div');
-            if (piece) {
-              marker.className = 'capture-ring absolute';
-            } else {
-              marker.className = 'move-dot absolute';
-            }
-            square.appendChild(marker);
-          }
-
-          // Eventos de toque / clic
-          square.addEventListener('click', () => handleSquareClick(r, c));
-
-          boardEl.appendChild(square);
-        }
-      }
-
-      // Actualizar información superior
-      document.getElementById('gameStatusText').textContent = chess.statusMessage;
-      document.getElementById('turnIndicatorBadge').className = `w-4 h-4 rounded-full border shadow inline-block ${chess.turn === 'w' ? 'bg-white border-stone-300' : 'bg-stone-900 border-amber-400'}`;
-      document.getElementById('difficultyBadge').textContent = `Nivel: ${diffNames[currentDifficulty]}`;
-
-      // Piezas capturadas
-      renderCapturedPieces();
-      saveGameAuto();
-    }
-
-    function renderCapturedPieces() {
-      const capW = document.getElementById('capturedWhite');
-      const capB = document.getElementById('capturedBlack');
-      capW.innerHTML = chess.capturedWhite.map(p => `<span class="inline-block w-4 h-4">${getPieceSvg(p[1], 'b')}</span>`).join('');
-      capB.innerHTML = chess.capturedBlack.map(p => `<span class="inline-block w-4 h-4">${getPieceSvg(p[1], 'w')}</span>`).join('');
-
-      if (chess.lastMove) {
-        const colNames = ['a','b','c','d','e','f','g','h'];
-        const fromStr = `${colNames[chess.lastMove.from[1]]}${8 - chess.lastMove.from[0]}`;
-        const toStr = `${colNames[chess.lastMove.to[1]]}${8 - chess.lastMove.to[0]}`;
-        document.getElementById('lastMoveNotation').textContent = `${fromStr} → ${toStr}`;
-      } else {
-        document.getElementById('lastMoveNotation').textContent = 'Inicio';
-      }
-    }
-
-    // Interacción al tocar una casilla
     function handleSquareClick(r, c) {
-      if (chess.isGameOver) return;
-      if (chess.turn !== 'w') return; // Bloquear mientras la IA calcula
+      if (isGameOver) return;
+      const piece = boardState[r][c];
 
-      const clickedPiece = chess.board[r][c];
-
-      // Si ya hay una pieza seleccionada y tocamos un destino legal
       if (selectedSquare) {
-        const matchingMove = legalMovesForSelected.find(m => m.to[0] === r && m.to[1] === c);
-        if (matchingMove) {
-          // Comprobar si requiere coronación de peón
-          const movingPiece = chess.board[selectedSquare[0]][selectedSquare[1]];
-          if (movingPiece === 'wp' && r === 0) {
-            pendingPromotionMove = matchingMove;
-            openPromotionModal();
-            return;
-          }
-
-          executePlayerMove(matchingMove);
+        const move = validMoves.find(m => m.r === r && m.c === c);
+        if (move) {
+          ejecutarMovimiento(selectedSquare.r, selectedSquare.c, r, c);
+          selectedSquare = null;
+          validMoves = [];
+          renderBoard();
+          setTimeout(turnoIA, 350);
           return;
         }
       }
 
-      // Si toca una pieza propia blanca
-      if (clickedPiece && clickedPiece[0] === 'w') {
-        selectedSquare = [r, c];
-        const allLegals = chess.getLegalMoves('w');
-        legalMovesForSelected = allLegals.filter(m => m.from[0] === r && m.from[1] === c);
+      if (isWhite(piece)) {
+        selectedSquare = { r, c };
+        validMoves = getBasicMoves(r, c, boardState);
+        renderBoard();
       } else {
         selectedSquare = null;
-        legalMovesForSelected = [];
+        validMoves = [];
+        renderBoard();
       }
-
-      renderBoard();
     }
 
-    function executePlayerMove(move, promo = 'q') {
-      const captured = chess.makeMove(move, promo);
-      if (captured) {
-        sound.playCaptureSound();
-      } else {
-        sound.playMoveSound();
-      }
+    function ejecutarMovimiento(fr, fc, tr, tc) {
+      history.push(JSON.parse(JSON.stringify(boardState)));
+      const captured = boardState[tr][tc] !== '';
+      boardState[tr][tc] = boardState[fr][fc];
+      boardState[fr][fc] = '';
 
+      // Promoción básica a dama
+      if (boardState[tr][tc] === 'P' && tr === 0) boardState[tr][tc] = 'Q';
+      if (boardState[tr][tc] === 'p' && tr === 7) boardState[tr][tc] = 'q';
+
+      playWoodSound(captured);
+    }
+
+    function deshacer() {
+      if (history.length > 0) {
+        boardState = history.pop();
+        selectedSquare = null;
+        validMoves = [];
+        isGameOver = false;
+        statusElem.textContent = "Tu turno (Blancas)";
+        renderBoard();
+      }
+    }
+
+    function reiniciarPartida() {
+      boardState = [
+        ['r','n','b','q','k','b','n','r'],
+        ['p','p','p','p','p','p','p','p'],
+        ['','','','','','','',''],
+        ['','','','','','','',''],
+        ['','','','','','','',''],
+        ['','','','','','','',''],
+        ['P','P','P','P','P','P','P','P'],
+        ['R','N','B','Q','K','B','N','R']
+      ];
+      history = [];
       selectedSquare = null;
-      legalMovesForSelected = [];
+      validMoves = [];
+      isGameOver = false;
+      statusElem.textContent = "Tu turno (Blancas)";
       renderBoard();
-
-      // Turno de la IA
-      if (!chess.isGameOver && chess.turn === 'b') {
-        triggerAIMove();
-      }
     }
 
-    function triggerAIMove() {
-      const thinkingEl = document.getElementById('aiThinkingIcon');
-      thinkingEl.classList.remove('hidden');
+    function setDiff(lvl) {
+      difficulty = lvl;
+      document.querySelectorAll(".lvl-btn").forEach((b, idx) => {
+        b.classList.toggle("active", idx + 1 === lvl);
+      });
+    }
 
-      // Simular tiempo de pensamiento agradable para adulto mayor (450ms a 750ms)
-      const thinkDelay = currentDifficulty === 1 ? 400 : 650;
+    // --- IA DE DIFICULTADES ESCALONADAS ---
+    function turnoIA() {
+      aiStatusElem.textContent = "Pensando...";
+      statusElem.textContent = "Turno de las Negras...";
 
       setTimeout(() => {
-        const aiMove = getAIMove(chess, currentDifficulty);
-        thinkingEl.classList.add('hidden');
-
-        if (aiMove) {
-          const cap = chess.makeMove(aiMove, 'q');
-          if (cap) {
-            sound.playCaptureSound();
-          } else {
-            sound.playMoveSound();
+        const allMoves = [];
+        for (let r = 0; r < 8; r++) {
+          for (let c = 0; c < 8; c++) {
+            if (isBlack(boardState[r][c])) {
+              const moves = getBasicMoves(r, c, boardState);
+              moves.forEach(m => allMoves.push({ fr: r, fc: c, tr: m.r, tc: m.c }));
+            }
           }
         }
-        renderBoard();
-      }, thinkDelay);
-    }
 
-    // Deshacer movimiento (Retrocede jugada de la IA y del jugador para que vuelva a su turno)
-    function undoMove() {
-      if (chess.moveHistory.length === 0) {
-        showToast('No hay jugadas anteriores');
-        return;
-      }
-
-      // Si es turno de blancas, retrocede el turno negro de la IA y el blanco del jugador
-      if (chess.turn === 'w' && chess.moveHistory.length >= 2) {
-        chess.undo(); // Deshace IA
-        chess.undo(); // Deshace jugador
-      } else {
-        chess.undo();
-      }
-
-      selectedSquare = null;
-      legalMovesForSelected = [];
-      sound.playMoveSound();
-      renderBoard();
-      showToast('Jugada deshecha');
-    }
-
-    // Modal de Coronación
-    function openPromotionModal() {
-      document.getElementById('promoQueenSvg').innerHTML = getPieceSvg('q', 'w');
-      document.getElementById('promoRookSvg').innerHTML = getPieceSvg('r', 'w');
-      document.getElementById('promoBishopSvg').innerHTML = getPieceSvg('b', 'w');
-      document.getElementById('promoKnightSvg').innerHTML = getPieceSvg('n', 'w');
-      toggleModal('modalPromotion', true);
-    }
-
-    function choosePromotion(pieceType) {
-      toggleModal('modalPromotion', false);
-      if (pendingPromotionMove) {
-        executePlayerMove(pendingPromotionMove, pieceType);
-        pendingPromotionMove = null;
-      }
-    }
-
-    // Selector de Dificultad
-    function selectDifficultyAndStart(level) {
-      currentDifficulty = level;
-      toggleModal('modalNewGame', false);
-      chess.reset();
-      selectedSquare = null;
-      legalMovesForSelected = [];
-      renderBoard();
-      showToast(`Nueva partida iniciada (${diffNames[level]})`);
-    }
-
-    /* ==========================================================================
-       6. SISTEMA DE MÚLTIPLES RANURAS DE GUARDADO (LOCALSTORAGE)
-       ========================================================================== */
-    function saveGameToSlot(slot) {
-      const data = {
-        board: chess.board,
-        turn: chess.turn,
-        castling: chess.castling,
-        enPassant: chess.enPassant,
-        moveHistory: chess.moveHistory,
-        capturedWhite: chess.capturedWhite,
-        capturedBlack: chess.capturedBlack,
-        lastMove: chess.lastMove,
-        isGameOver: chess.isGameOver,
-        statusMessage: chess.statusMessage,
-        difficulty: currentDifficulty,
-        date: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
-      };
-      localStorage.setItem(`chess_senior_slot_${slot}`, JSON.stringify(data));
-      showToast(`Partida guardada en Espacio ${slot}`);
-      refreshSlotsUI();
-    }
-
-    function loadGameFromSlot(slot) {
-      const saved = localStorage.getItem(`chess_senior_slot_${slot}`);
-      if (!saved) {
-        showToast('Ese espacio está vacío');
-        return;
-      }
-      try {
-        const data = JSON.parse(saved);
-        chess.board = data.board;
-        chess.turn = data.turn;
-        chess.castling = data.castling;
-        chess.enPassant = data.enPassant;
-        chess.moveHistory = data.moveHistory;
-        chess.capturedWhite = data.capturedWhite;
-        chess.capturedBlack = data.capturedBlack;
-        chess.lastMove = data.lastMove;
-        chess.isGameOver = data.isGameOver;
-        chess.statusMessage = data.statusMessage;
-        currentDifficulty = data.difficulty || 2;
-        currentSlot = slot;
-
-        selectedSquare = null;
-        legalMovesForSelected = [];
-        toggleModal('modalSlots', false);
-        renderBoard();
-        showToast(`Partida ${slot} cargada`);
-      } catch(e) {
-        showToast('Error al cargar la partida');
-      }
-    }
-
-    function saveGameAuto() {
-      // Autoguardado silencioso de la sesión actual
-      try {
-        const autoData = {
-          board: chess.board,
-          turn: chess.turn,
-          castling: chess.castling,
-          enPassant: chess.enPassant,
-          moveHistory: chess.moveHistory,
-          capturedWhite: chess.capturedWhite,
-          capturedBlack: chess.capturedBlack,
-          lastMove: chess.lastMove,
-          isGameOver: chess.isGameOver,
-          statusMessage: chess.statusMessage,
-          difficulty: currentDifficulty
-        };
-        localStorage.setItem('chess_senior_autosave', JSON.stringify(autoData));
-      } catch(e) {}
-    }
-
-    function loadAutoSave() {
-      const saved = localStorage.getItem('chess_senior_autosave');
-      if (saved) {
-        try {
-          const data = JSON.parse(saved);
-          chess.board = data.board;
-          chess.turn = data.turn;
-          chess.castling = data.castling;
-          chess.enPassant = data.enPassant;
-          chess.moveHistory = data.moveHistory;
-          chess.capturedWhite = data.capturedWhite;
-          chess.capturedBlack = data.capturedBlack;
-          chess.lastMove = data.lastMove;
-          chess.isGameOver = data.isGameOver;
-          chess.statusMessage = data.statusMessage;
-          currentDifficulty = data.difficulty || 2;
-        } catch(e) {}
-      }
-    }
-
-    function refreshSlotsUI() {
-      const container = document.getElementById('slotsContainer');
-      container.innerHTML = '';
-
-      for (let s = 1; s <= 3; s++) {
-        const saved = localStorage.getItem(`chess_senior_slot_${s}`);
-        let infoText = 'Espacio vacío (Toca guardar)';
-        let hasData = false;
-
-        if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            infoText = `Nivel: ${diffNames[parsed.difficulty]} • ${parsed.date || 'Guardada'}`;
-            hasData = true;
-          } catch(e) {}
+        if (allMoves.length === 0) {
+          statusElem.textContent = "¡Jaque Mate! Ganaste.";
+          isGameOver = true;
+          return;
         }
 
-        const slotCard = document.createElement('div');
-        slotCard.className = 'p-3 bg-stone-800/90 rounded-2xl border border-stone-700 flex items-center justify-between';
-        slotCard.innerHTML = `
-          <div>
-            <div class="font-bold text-amber-200 text-sm">Partida ${s}</div>
-            <div class="text-xs text-stone-400">${infoText}</div>
-          </div>
-          <div class="flex items-center gap-2">
-            ${hasData ? `
-              <button onclick="loadGameFromSlot(${s})" class="px-3 py-1.5 bg-sky-700 hover:bg-sky-600 text-white rounded-xl text-xs font-bold shadow">
-                Cargar
-              </button>
-            ` : ''}
-            <button onclick="saveGameToSlot(${s})" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow">
-              Guardar Aquí
-            </button>
-          </div>
-        `;
-        container.appendChild(slotCard);
-      }
+        let chosenMove;
+        if (difficulty === 1) {
+          // Fácil: Aleatorio
+          chosenMove = allMoves[Math.floor(Math.random() * allMoves.length)];
+        } else {
+          // Busca capturar piezas de mayor valor
+          const pieceVals = { 'p': 10, 'n': 30, 'b': 30, 'r': 50, 'q': 90, 'k': 900 };
+          allMoves.sort((a, b) => {
+            const valA = boardState[a.tr][a.tc] ? (pieceVals[boardState[a.tr][a.tc].toLowerCase()] || 0) : 0;
+            const valB = boardState[b.tr][b.tc] ? (pieceVals[boardState[b.tr][b.tc].toLowerCase()] || 0) : 0;
+            return valB - valA;
+          });
+          chosenMove = (difficulty > 2 && allMoves[0].val > 0) ? allMoves[0] : allMoves[Math.floor(Math.random() * Math.min(3, allMoves.length))];
+        }
+
+        ejecutarMovimiento(chosenMove.fr, chosenMove.fc, chosenMove.tr, chosenMove.tc);
+        aiStatusElem.textContent = "Listo";
+        statusElem.textContent = "Tu turno (Blancas)";
+        renderBoard();
+      }, 300);
     }
 
-    /* ==========================================================================
-       7. UTILIDADES, AUDIO TOGGLE, COMPARTIR Y PWA INSTALL
-       ========================================================================== */
-    function toggleModal(modalId, show) {
-      const el = document.getElementById(modalId);
-      if (show) {
-        el.classList.remove('hidden');
-      } else {
-        el.classList.add('hidden');
-      }
-    }
-
-    function toggleSound() {
-      sound.enabled = !sound.enabled;
-      const btn = document.getElementById('soundToggleBtn');
-      if (sound.enabled) {
-        btn.textContent = 'Activado';
-        btn.className = 'px-4 py-2 bg-emerald-700 text-white font-bold rounded-xl text-xs';
-        sound.playMoveSound();
-      } else {
-        btn.textContent = 'Silenciado';
-        btn.className = 'px-4 py-2 bg-stone-700 text-stone-300 font-bold rounded-xl text-xs';
-      }
-    }
-
-    function showToast(msg) {
-      const toast = document.getElementById('toastMessage');
-      toast.textContent = msg;
-      toast.classList.remove('opacity-0');
-      toast.classList.add('opacity-100');
-      setTimeout(() => {
-        toast.classList.remove('opacity-100');
-        toast.classList.add('opacity-0');
-      }, 2300);
-    }
-
-    function shareGameLink() {
-      const url = window.location.href;
-      const text = '¡Te invito a jugar una partida de ajedrez sin anuncios ni complicaciones!';
-      if (navigator.share) {
-        navigator.share({ title: 'Ajedrez Clásico', text: text, url: url }).catch(() => {});
-      } else {
-        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text + ' ' + url)}`;
-        window.open(whatsappUrl, '_blank');
-      }
-    }
-
-    // Instalación PWA en Android
-    let deferredPrompt = null;
-    const installBtn = document.getElementById('installAppBtn');
-
+    // --- INSTALACIÓN PWA NATIVA ---
+    let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      installBtn.classList.remove('hidden');
+      document.getElementById('install-banner').style.display = 'block';
     });
 
-    installBtn.addEventListener('click', async () => {
+    function instalarApp() {
       if (deferredPrompt) {
         deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          installBtn.classList.add('hidden');
-          showToast('¡Instalando Ajedrez!');
-        }
-        deferredPrompt = null;
-      } else {
-        toggleModal('modalSettings', true);
+        deferredPrompt.userChoice.then(() => {
+          document.getElementById('install-banner').style.display = 'none';
+          deferredPrompt = null;
+        });
       }
-    });
+    }
 
-    // Iniciar juego al cargar la página
-    window.onload = function() {
-      loadAutoSave();
-      renderBoard();
-    };
+    // Registrar Service Worker virtual en memoria
+    if ('serviceWorker' in navigator) {
+      const swCode = `self.addEventListener('fetch', function(e) {});`;
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+    }
+
+    renderBoard();
   </script>
 </body>
 </html>
